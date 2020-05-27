@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { FieldProps, Operators } from '../types';
-import { OperatorSelect } from './OperatorSelect';
 import {
   operatorToString as defaultOperatorToString,
   nullOperator,
 } from '../utils';
+import { OperatorSelect } from './OperatorSelect';
 
 const operatorToString = (operator: Operators) => {
   switch (operator) {
@@ -46,8 +46,13 @@ export const DateField: React.SFC<FieldProps> = ({
         operators={operators}
         operatorToString={operatorToString}
       />
-      <div style={styles}>
-        <input type="date" value={value} onChange={handleChange} />
+      <div style={styles} className="rnf-builder__rule-input-wrapper">
+        <input
+          className="rnf-builder__rule-input rnf-builder__input"
+          type="date"
+          value={value}
+          onChange={handleChange}
+        />
       </div>
     </>
   );

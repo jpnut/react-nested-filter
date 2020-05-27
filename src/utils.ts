@@ -1,17 +1,18 @@
 import {
-  Group,
-  Rule,
-  Groups,
-  Rules,
-  State,
-  Schema,
   FieldSchema,
+  Group,
+  Groups,
   Operators,
+  Rule,
+  Rules,
+  Schema,
+  State,
 } from './types';
-import { nanoid } from 'nanoid';
+
+let counter = 0;
 
 const createKeyedRule = (rule: Rule): Rules => ({
-  [nanoid()]: rule,
+  [counter++]: rule,
 });
 
 const addRule = <R extends string>(
@@ -92,7 +93,7 @@ const createKeyedGroup = <R extends string>(
   resource: R,
   parent?: string
 ): Groups<R> => ({
-  [nanoid()]: createGroup(resource, parent),
+  [counter++]: createGroup(resource, parent),
 });
 
 const addGroup = <R extends string>(
@@ -135,7 +136,8 @@ const updateGroup = <R extends string>(
 
 const removeGroup = <R extends string>(
   { groups, rules, ...state }: State<R>,
-  key: string
+  key: string,
+  nested = false
 ): State<R> => {
   const {
     [key]: { children, rules: groupRules, parent },
@@ -148,13 +150,15 @@ const removeGroup = <R extends string>(
   }
 
   // remove the group from the groups object and from the children array in the parent group
-  const newGroups = {
-    ...rest,
-    [parent]: {
-      ...rest[parent],
-      children: rest[parent].children.filter(g => g !== key),
-    },
-  };
+  const newGroups = nested
+    ? rest
+    : {
+        ...rest,
+        [parent]: {
+          ...rest[parent],
+          children: rest[parent].children.filter(g => g !== key),
+        },
+      };
 
   let newState = { ...state, groups: newGroups, rules };
 
@@ -165,7 +169,7 @@ const removeGroup = <R extends string>(
   });
 
   children.forEach(child => {
-    newState = removeGroup(newState, child);
+    newState = removeGroup(newState, child, true);
   });
 
   return newState;
@@ -251,6 +255,16 @@ const nullOperator = (operator: Operators) =>
 
 const isNil = (value: any) => value === null || value === undefined;
 
+const invert = (obj: { [x: string]: string }) => {
+  const newObj: { [x: string]: string } = {};
+
+  Object.keys(obj).forEach(key => {
+    newObj[obj[key]] = key;
+  });
+
+  return newObj;
+};
+
 export {
   addRule,
   updateRule,
@@ -265,4 +279,5 @@ export {
   operatorToString,
   nullOperator,
   isNil,
+  invert,
 };

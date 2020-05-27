@@ -8,6 +8,7 @@ import {
   DateField,
   BooleanField,
 } from '../src/fields';
+import '../src/styles.scss';
 
 export default {
   title: 'Welcome',

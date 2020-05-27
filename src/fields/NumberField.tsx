@@ -35,8 +35,9 @@ export const NumberField: React.SFC<FieldProps> = ({
         operators={operators}
         operatorToString={operatorToString}
       />
-      <div style={styles}>
+      <div style={styles} className="rnf-builder__rule-input-wrapper">
         <input
+          className="rnf-builder__rule-input rnf-builder__input"
           type="number"
           value={isNil(value) ? '' : value}
           onChange={handleChange}

@@ -94,3 +94,40 @@ export interface Filter {
   or?: Filter[] | null;
   [x: string]: FilterValue | null | undefined;
 }
+
+export interface Components {
+  Container: React.ElementType;
+  FilterButton: React.ElementType<{
+    filter: () => void;
+  }>;
+  GroupContainer: React.ElementType;
+  GroupHeader: React.ElementType;
+  GroupTitle: React.ElementType;
+  GroupRemoveButton: React.ElementType<{
+    removeGroup: () => void;
+  }>;
+  GroupOptionsContainer: React.ElementType;
+  AddGroupDropdown: React.ElementType<{
+    options: Record<string, string>;
+    addGroup: (resource: string) => void;
+  }>;
+  InclusivityDropdown: React.ElementType<{
+    inclusive: boolean;
+    setInclusivity: (inclusivity: boolean) => void;
+  }>;
+  AddRuleButton: React.ElementType<{
+    addRule: () => void;
+  }>;
+  GroupRulesContainer: React.ElementType;
+  RuleContainer: React.ElementType;
+  RuleSelect: React.ElementType<{
+    resource: string;
+    field: string;
+    setRuleField: (field: string) => void;
+    options: { key: string; value: string }[];
+  }>;
+  RuleField: React.ElementType;
+  RuleRemoveButton: React.ElementType<{
+    removeRule: () => void;
+  }>;
+}

@@ -28,8 +28,13 @@ export const IDField: React.SFC<FieldProps> = ({
         operators={operators}
         operatorToString={operatorToString}
       />
-      <div style={styles}>
-        <input type="text" value={value || ''} onChange={handleChange} />
+      <div style={styles} className="rnf-builder__rule-input-wrapper">
+        <input
+          className="rnf-builder__rule-input rnf-builder__input"
+          type="text"
+          value={value || ''}
+          onChange={handleChange}
+        />
       </div>
     </>
   );

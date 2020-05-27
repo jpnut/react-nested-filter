@@ -42,8 +42,13 @@ export const BooleanField: React.SFC<FieldProps> = ({
         operators={operators}
         operatorToString={operatorToString}
       />
-      <div style={styles}>
-        <input type="checkbox" checked={!!value} onChange={handleChange} />
+      <div style={styles} className="rnf-builder__rule-input-wrapper">
+        <input
+          className="rnf-builder__rule-checkbox rnf-builder__input"
+          type="checkbox"
+          checked={!!value}
+          onChange={handleChange}
+        />
       </div>
     </>
   );

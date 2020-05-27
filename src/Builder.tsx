@@ -1,6 +1,7 @@
 import * as React from 'react';
+import { useComponents, ComponentContext } from './components';
 import { Group as GroupComponent } from './Group';
-import { Schema, State, FieldSchema } from './types';
+import { Schema, State, FieldSchema, Components } from './types';
 import { initialState } from './utils';
 
 export interface Props<R extends string> {
@@ -9,6 +10,7 @@ export interface Props<R extends string> {
   resource: R;
   schema: Schema<R>;
   fieldSchema: FieldSchema;
+  components?: Partial<Components>;
 }
 
 export const Builder = <R extends string>({
@@ -16,8 +18,11 @@ export const Builder = <R extends string>({
   resource,
   schema,
   fieldSchema,
+  components: propComponents,
 }: Props<R>) => {
   const [state, setState] = React.useState<State<R>>(initialState(resource));
+
+  const components = useComponents(propComponents);
 
   React.useEffect(() => onFilter(state), []);
 
@@ -26,17 +31,21 @@ export const Builder = <R extends string>({
   };
 
   return (
-    <div>
-      <GroupComponent
-        key={state.root}
-        {...state.groups[state.root]}
-        group={state.root}
-        state={state}
-        setState={setState}
-        schema={schema}
-        fieldSchema={fieldSchema}
-      />
-      <button onClick={handleFilter}>Filter</button>
-    </div>
+    <ComponentContext.Provider value={components}>
+      <components.Container>
+        <GroupComponent
+          key={state.root}
+          {...state.groups[state.root]}
+          group={state.root}
+          state={state}
+          setState={setState}
+          schema={schema}
+          fieldSchema={fieldSchema}
+        />
+        <components.FilterButton filter={handleFilter}>
+          Filter
+        </components.FilterButton>
+      </components.Container>
+    </ComponentContext.Provider>
   );
 };

@@ -23,7 +23,11 @@ export const OperatorSelect: React.SFC<Props> = ({
 
   return (
     <div>
-      <select value={operator} onChange={handleChangeOperator}>
+      <select
+        className="rnf-builder__operator-select rnf-builder__select"
+        value={operator}
+        onChange={handleChangeOperator}
+      >
         {operators.map(op => (
           <option key={op} value={op}>
             {operatorToString(op)}

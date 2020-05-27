@@ -1,0 +1,148 @@
+.rnf-builder__container {
+  font-family: Arial, Helvetica, sans-serif;
+  width: 100%;
+
+  & > .rnf-builder__group {
+    margin-bottom: 1rem;
+  }
+}
+
+.rnf-builder__button {
+  background-color: white;
+  border-radius: 3px;
+  box-shadow: none;
+  border: 1px solid #f1f1f1;
+  height: 1.75rem;
+  transition: background-color 250ms;
+
+  &:hover {
+    background-color: #f1f1f1;
+  }
+}
+
+.rnf-builder__select {
+  background-color: white;
+  border-radius: 3px;
+  border: 1px solid #f1f1f1;
+  box-shadow: none;
+  box-sizing: border-box;
+  height: 1.75rem;
+}
+
+.rnf-builder__group {
+  // Add a left border to all nested groups to help indicate their nested level
+  .rnf-builder__group {
+    border-left: 1px solid #f1f1f1;
+  }
+}
+
+.rnf-builder__group-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.rnf-builder__group-title {
+  display: inline-block;
+  margin: 0;
+}
+
+.rnf-builder__group-options {
+  margin-bottom: 0.75rem;
+}
+
+.rnf-builder__group-option {
+  height: 1.75rem;
+
+  &:not(:last-child) {
+    margin-right: 0.5rem;
+  }
+}
+
+.rnf-builder__group-rules {
+  display: flex;
+  flex-direction: column;
+
+  .rnf-builder__group {
+    padding: 1rem;
+  }
+}
+
+.rnf-builder__rule {
+  background-color: #f1f1f1;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: row;
+  padding: 0.25rem;
+
+  &:not(:last-child) {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.rnf-builder__rule-select {
+  margin-right: 0.5rem;
+}
+
+.rnf-builder__rule-field {
+  display: flex;
+  flex: 1;
+}
+
+.rnf-builder__rule-remove {
+  margin-left: 0.5rem;
+}
+
+.rnf-builder__operator-select {
+  margin-right: 0.5rem;
+}
+
+.rnf-builder__input {
+  background-color: white;
+  border-radius: 3px;
+  border: 1px solid #f1f1f1;
+  box-shadow: none;
+  box-sizing: border-box;
+  height: 1.75rem;
+  margin: 0;
+}
+
+.rnf-builder__rule-input-wrapper {
+  display: flex;
+  flex: 1;
+}
+
+.rnf-builder__rule-input {
+  flex: 1;
+}
+
+.rnf-builder__rule-checkbox {
+  position: relative;
+  width: 1.75rem;
+
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    background-color: white;
+  }
+
+  &:checked {
+    &:after {
+      background-color: #2d81ff;
+    }
+  }
+}

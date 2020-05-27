@@ -1,12 +1,13 @@
 import * as React from 'react';
 import {
-  Rule as RuleType,
-  State,
-  Schema,
   FieldSchema,
   Operators,
+  Rule as RuleType,
+  Schema,
+  State,
 } from './types';
 import { removeRule, updateRule, ruleInitializer, nullOperator } from './utils';
+import { ComponentContext } from './components';
 
 interface Props<R extends string> extends RuleType {
   rule: string;
@@ -33,6 +34,13 @@ export const Rule = <R extends string>({
   schema,
   fieldSchema,
 }: Props<R>) => {
+  const {
+    RuleContainer,
+    RuleSelect,
+    RuleField,
+    RuleRemoveButton,
+  } = React.useContext(ComponentContext);
+
   const resource = state.groups[group].resource;
   const fields = schema[resource].fields;
 
@@ -40,15 +48,8 @@ export const Rule = <R extends string>({
     return null;
   }
 
-  const handleChangeField = ({
-    target: { value },
-  }: React.ChangeEvent<HTMLSelectElement>) => {
-    const newRule = ruleInitializer(
-      schema,
-      fieldSchema,
-      resource,
-      value as string
-    );
+  const handleChangeField = (field: string) => {
+    const newRule = ruleInitializer(schema, fieldSchema, resource, field);
 
     if (!newRule) {
       return;
@@ -73,23 +74,29 @@ export const Rule = <R extends string>({
 
   const field = fieldSchema[fields[name].type];
 
+  const fieldOptions = Object.keys(fields).map(key => ({
+    key,
+    value: fields[key].name || startCase(key),
+  }));
+
   return (
-    <div>
-      <select value={name} onChange={handleChangeField}>
-        {Object.keys(fields).map(key => (
-          <option key={`${resource}-${key}`} value={key}>
-            {fields[key].name || startCase(key)}
-          </option>
-        ))}
-      </select>
-      <field.render
-        value={value}
-        setValue={setValue}
-        operator={operator}
-        setOperator={setOperator}
-        operators={field.operators}
+    <RuleContainer>
+      <RuleSelect
+        resource={resource}
+        field={name}
+        setRuleField={handleChangeField}
+        options={fieldOptions}
       />
-      <button onClick={handleRemoveRule}>x</button>
-    </div>
+      <RuleField>
+        <field.render
+          value={value}
+          setValue={setValue}
+          operator={operator}
+          setOperator={setOperator}
+          operators={field.operators}
+        />
+      </RuleField>
+      <RuleRemoveButton removeRule={handleRemoveRule}>x</RuleRemoveButton>
+    </RuleContainer>
   );
 };
