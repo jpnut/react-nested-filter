@@ -1,6 +1,6 @@
 import React from 'react';
 import * as ReactDOM from 'react-dom';
-import { NestedFilter as Builder } from '../stories/Builder.stories';
+import { Default as Builder } from '../stories/Builder.stories';
 
 describe('Thing', () => {
   it('renders without crashing', () => {

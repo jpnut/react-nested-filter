@@ -4,3 +4,4 @@ export * from './IDField';
 export * from './NumberField';
 export * from './StringField';
 export * from './OperatorSelect';
+export * from './schema';

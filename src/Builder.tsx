@@ -1,38 +1,52 @@
 import * as React from 'react';
-import { useComponents, ComponentContext } from './components';
 import { Group as GroupComponent } from './Group';
-import { Schema, State, FieldSchema, Components } from './types';
+import {
+  Schema,
+  State,
+  FieldSchema,
+  Components,
+  FieldTypeDefinition,
+} from './types';
 import { initialState } from './utils';
+import { useFilter, createFilterContext } from './Context';
 
-export interface Props<R extends string> {
+export interface Props<R extends string, F extends FieldTypeDefinition> {
   onChange?: () => void;
   onFilter: (state: State<R>) => void;
   resource: R;
-  schema: Schema<R>;
-  fieldSchema: FieldSchema;
-  components?: Partial<Components>;
+  schema: Schema<R, F>;
+  components?: (defaultComponents: Components) => Components;
+  fieldSchema?: FieldSchema<F>;
 }
 
-export const Builder = <R extends string>({
-  onFilter,
+export const Builder = <R extends string, F extends FieldTypeDefinition>({
   resource,
-  schema,
-  fieldSchema,
   components: propComponents,
-}: Props<R>) => {
-  const [state, setState] = React.useState<State<R>>(initialState(resource));
+  fieldSchema: propFieldSchema,
+  onFilter,
+  schema,
+}: Props<R, F>) => {
+  const memoizedState = React.useMemo(() => initialState(resource), []);
 
-  const components = useComponents(propComponents);
+  const [state, setState] = React.useState<State<R>>(memoizedState);
 
-  React.useEffect(() => onFilter(state), []);
+  const { FilterContext, useFilterContext } = React.useMemo(
+    () => createFilterContext<F>(),
+    []
+  );
+
+  const context = useFilter({
+    components: propComponents,
+    fieldSchema: propFieldSchema,
+  });
 
   const handleFilter = () => {
     onFilter(state);
   };
 
   return (
-    <ComponentContext.Provider value={components}>
-      <components.Container>
+    <FilterContext.Provider value={context}>
+      <context.components.Container>
         <GroupComponent
           key={state.root}
           {...state.groups[state.root]}
@@ -40,12 +54,12 @@ export const Builder = <R extends string>({
           state={state}
           setState={setState}
           schema={schema}
-          fieldSchema={fieldSchema}
+          useFilterContext={useFilterContext}
         />
-        <components.FilterButton filter={handleFilter}>
+        <context.components.FilterButton filter={handleFilter}>
           Filter
-        </components.FilterButton>
-      </components.Container>
-    </ComponentContext.Provider>
+        </context.components.FilterButton>
+      </context.components.Container>
+    </FilterContext.Provider>
   );
 };

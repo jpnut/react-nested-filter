@@ -1,20 +1,21 @@
 import * as React from 'react';
 import {
-  FieldSchema,
   Operators,
   Rule as RuleType,
   Schema,
   State,
+  FieldTypeDefinition,
 } from './types';
 import { removeRule, updateRule, ruleInitializer, nullOperator } from './utils';
-import { ComponentContext } from './components';
+import { FilterState } from './Context';
 
-interface Props<R extends string> extends RuleType {
+interface Props<R extends string, F extends FieldTypeDefinition>
+  extends RuleType {
   rule: string;
   state: State<R>;
   setState: React.Dispatch<React.SetStateAction<State<R>>>;
-  schema: Schema<R>;
-  fieldSchema: FieldSchema;
+  schema: Schema<R, F>;
+  useFilterContext: () => FilterState<F>;
 }
 
 const startCase = (str: string) =>
@@ -23,7 +24,7 @@ const startCase = (str: string) =>
     txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
   );
 
-export const Rule = <R extends string>({
+export const Rule = <R extends string, F extends FieldTypeDefinition>({
   group,
   name,
   operator,
@@ -32,14 +33,12 @@ export const Rule = <R extends string>({
   state,
   setState,
   schema,
-  fieldSchema,
-}: Props<R>) => {
+  useFilterContext,
+}: Props<R, F>) => {
   const {
-    RuleContainer,
-    RuleSelect,
-    RuleField,
-    RuleRemoveButton,
-  } = React.useContext(ComponentContext);
+    components: { RuleContainer, RuleSelect, RuleField, RuleRemoveButton },
+    fieldSchema,
+  } = useFilterContext();
 
   const resource = state.groups[group].resource;
   const fields = schema[resource].fields;
@@ -72,12 +71,18 @@ export const Rule = <R extends string>({
     setState(removeRule(state, rule));
   };
 
-  const field = fieldSchema[fields[name].type];
+  const Field = fieldSchema && fieldSchema[fields[name].type];
+
+  if (!Field) {
+    return null;
+  }
 
   const fieldOptions = Object.keys(fields).map(key => ({
     key,
     value: fields[key].name || startCase(key),
   }));
+
+  const props = fields[name].fieldProps;
 
   return (
     <RuleContainer>
@@ -88,12 +93,13 @@ export const Rule = <R extends string>({
         options={fieldOptions}
       />
       <RuleField>
-        <field.render
+        <Field.render
           value={value}
           setValue={setValue}
           operator={operator}
           setOperator={setOperator}
-          operators={field.operators}
+          operators={Field.operators}
+          {...(props as F[keyof F])}
         />
       </RuleField>
       <RuleRemoveButton removeRule={handleRemoveRule}>x</RuleRemoveButton>

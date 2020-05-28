@@ -1,10 +1,16 @@
-export enum FieldTypes {
-  ID,
-  STRING,
-  NUMBER,
-  BOOLEAN,
-  DATE,
+export interface NumberFieldProps {
+  step?: number;
+  min?: number;
+  max?: number;
 }
+
+export type DefaultFieldDefinitions = {
+  id: never;
+  string: never;
+  number: NumberFieldProps;
+  boolean: never;
+  date: never;
+};
 
 export enum Operators {
   IS = 'IS',
@@ -25,19 +31,55 @@ export enum Operators {
   NOT_NULL = 'NOT_NULL',
 }
 
-export interface Resource<R extends string> {
+export type FieldTypeDefinition = {
+  [key: string]: never | Record<string, any>;
+};
+
+type BaseFieldDefinition = {
+  operators: Operators[];
+  defaultValue?: () => any;
+};
+
+export type FieldSchema<T extends FieldTypeDefinition> = {
+  [K in keyof T]: BaseFieldDefinition &
+    (T[K] extends never
+      ? {
+          render: React.SFC<FieldProps>;
+        }
+      : {
+          render: React.SFC<FieldProps & T[K]>;
+        });
+};
+
+type BaseFieldType<T> = {
+  type: T;
+};
+
+export type FieldTypeMap<T extends FieldTypeDefinition> = {
+  [K in keyof T]: BaseFieldType<K> &
+    (T[K] extends never ? { fieldProps?: never } : { fieldProps: T[K] });
+};
+
+export type FieldTypesUnion<T extends FieldTypeDefinition> = FieldTypeMap<
+  T
+>[keyof FieldTypeMap<T>];
+
+export type FieldType<F extends FieldTypeDefinition> = {
+  name?: string;
+} & FieldTypesUnion<F>;
+
+export interface Resource<R extends string, F extends FieldTypeDefinition> {
   fields?: {
-    [x: string]: {
-      name?: string;
-      type: FieldTypes;
-    };
+    [x: string]: FieldType<F>;
   };
   relations?: {
     [x: string]: R;
   };
 }
 
-export type Schema<R extends string> = { [key in R]: Resource<R> };
+export type Schema<R extends string, F extends FieldTypeDefinition> = {
+  [key in R]: Resource<R, F>;
+};
 
 export interface Group<R extends string> {
   children: string[];
@@ -73,14 +115,6 @@ export interface FieldProps {
 }
 
 export type SubGroupOptions<R extends string> = { [x in R]: string };
-
-export type FieldSchema = {
-  [x in FieldTypes]: {
-    operators: Operators[];
-    render: React.SFC<FieldProps>;
-    defaultValue?: () => any;
-  };
-};
 
 export interface FilterObject {
   operator: Operators;

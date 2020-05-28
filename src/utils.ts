@@ -7,6 +7,7 @@ import {
   Rules,
   Schema,
   State,
+  FieldTypeDefinition,
 } from './types';
 
 let counter = 0;
@@ -186,9 +187,9 @@ const initialState = <R extends string>(resource: R): State<R> => {
   };
 };
 
-const ruleInitializer = <R extends string>(
-  schema: Schema<R>,
-  fieldSchema: FieldSchema,
+const ruleInitializer = <R extends string, F extends FieldTypeDefinition>(
+  schema: Schema<R, F>,
+  fieldSchema: FieldSchema<F>,
   resource: R,
   name: string
 ): Pick<Rule, 'name' | 'operator' | 'value'> | undefined => {
@@ -204,11 +205,12 @@ const ruleInitializer = <R extends string>(
     return;
   }
 
-  const defaultValueFunc = fieldSchema[field.type].defaultValue;
+  const defaultValueFunc =
+    fieldSchema[field.type as keyof FieldSchema<F>].defaultValue;
 
   return {
     name,
-    operator: fieldSchema[field.type].operators[0],
+    operator: fieldSchema[field.type as keyof FieldSchema<F>].operators[0],
     value: (defaultValueFunc && defaultValueFunc()) || undefined,
   };
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Components } from './types';
+import { Components } from '../types';
 
 export const defaultComponents: Components = {
   Container: ({ children, ...rest }) => (
@@ -138,13 +138,4 @@ export const defaultComponents: Components = {
       {children}
     </button>
   ),
-};
-
-export const ComponentContext = React.createContext(defaultComponents);
-
-export const useComponents = (components?: Partial<Components>) => {
-  return {
-    ...defaultComponents,
-    ...components,
-  };
 };

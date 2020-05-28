@@ -1,17 +1,20 @@
 import * as React from 'react';
-import { FieldProps } from '../types';
+import { FieldProps, NumberFieldProps } from '../types';
 import { operatorToString, isNil, nullOperator } from '../utils';
 import { OperatorSelect } from './OperatorSelect';
 
 const toNumber = (value: any) =>
   typeof value === 'number' ? value : Number(value);
 
-export const NumberField: React.SFC<FieldProps> = ({
+export const NumberField: React.SFC<FieldProps & NumberFieldProps> = ({
   value,
   setValue,
   operator,
   setOperator,
   operators,
+  step,
+  min,
+  max,
 }) => {
   const handleChange = ({
     target: { value: newValue },
@@ -41,6 +44,9 @@ export const NumberField: React.SFC<FieldProps> = ({
           type="number"
           value={isNil(value) ? '' : value}
           onChange={handleChange}
+          step={step}
+          min={min}
+          max={max}
         />
       </div>
     </>

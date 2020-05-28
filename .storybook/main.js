@@ -21,13 +21,6 @@ module.exports = {
       ],
     });
 
-    // config.module.plugins.push(
-    //   new MiniCssExtractPlugin({
-    //     filename: '[name].css',
-    //     chunkFilename: '[id].css',
-    //   })
-    // );
-
     config.module.rules.push({
       test: /\.s[ac]ss$/i,
       use: [

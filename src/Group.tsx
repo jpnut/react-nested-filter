@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { ComponentContext } from './components';
 import {
   addGroup,
   addRule,
@@ -9,23 +8,25 @@ import {
   updateGroup,
 } from './utils';
 import {
-  FieldSchema,
   Group as GroupType,
   Schema,
   State,
   SubGroupOptions,
+  FieldTypeDefinition,
 } from './types';
 import { Rule } from './Rule';
+import { FilterState } from './Context';
 
-interface Props<R extends string> extends GroupType<R> {
+interface Props<R extends string, F extends FieldTypeDefinition>
+  extends GroupType<R> {
   group: string;
   state: State<R>;
   setState: React.Dispatch<React.SetStateAction<State<R>>>;
-  schema: Schema<R>;
-  fieldSchema: FieldSchema;
+  schema: Schema<R, F>;
+  useFilterContext: () => FilterState<F>;
 }
 
-export const Group = <R extends string>({
+export const Group = <R extends string, F extends FieldTypeDefinition>({
   children,
   rules,
   inclusive,
@@ -34,19 +35,22 @@ export const Group = <R extends string>({
   state,
   setState,
   schema,
-  fieldSchema,
-}: Props<R>) => {
+  useFilterContext,
+}: Props<R, F>) => {
   const {
-    GroupContainer,
-    GroupHeader,
-    GroupTitle,
-    GroupRemoveButton,
-    GroupOptionsContainer,
-    AddGroupDropdown,
-    InclusivityDropdown,
-    AddRuleButton,
-    GroupRulesContainer,
-  } = React.useContext(ComponentContext);
+    components: {
+      GroupContainer,
+      GroupHeader,
+      GroupTitle,
+      GroupRemoveButton,
+      GroupOptionsContainer,
+      AddGroupDropdown,
+      InclusivityDropdown,
+      AddRuleButton,
+      GroupRulesContainer,
+    },
+    fieldSchema,
+  } = useFilterContext();
 
   const fields = schema[resource].fields;
   const relations = schema[resource].relations;
@@ -109,7 +113,7 @@ export const Group = <R extends string>({
             state={state}
             setState={setState}
             schema={schema}
-            fieldSchema={fieldSchema}
+            useFilterContext={useFilterContext}
           />
         ))}
         {children.map(child => (
@@ -120,7 +124,7 @@ export const Group = <R extends string>({
             state={state}
             setState={setState}
             schema={schema}
-            fieldSchema={fieldSchema}
+            useFilterContext={useFilterContext}
           />
         ))}
       </GroupRulesContainer>
