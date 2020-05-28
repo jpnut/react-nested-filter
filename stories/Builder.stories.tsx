@@ -2,7 +2,6 @@ import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { Builder, Props, isNil } from '../src';
 import { Operators, DefaultFieldDefinitions } from '../src/types';
-import { defaultFieldSchema } from '../src/fields';
 import '../src/styles.scss';
 
 export default {
@@ -110,7 +109,7 @@ export const CustomField = (
         },
       },
     }}
-    fieldSchema={{
+    fieldSchema={defaultFieldSchema => ({
       ...defaultFieldSchema,
       range: {
         operators: [
@@ -146,7 +145,7 @@ export const CustomField = (
           );
         },
       },
-    }}
+    })}
     {...props}
   />
 );

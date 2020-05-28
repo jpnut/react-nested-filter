@@ -1,11 +1,11 @@
-import { Operators } from '../types';
+import { Operators, FieldSchema, DefaultFieldDefinitions } from '../types';
 import { IDField } from './IDField';
 import { StringField } from './StringField';
 import { NumberField } from './NumberField';
 import { DateField } from './DateField';
 import { BooleanField } from './BooleanField';
 
-export const defaultFieldSchema = {
+export const defaultFieldSchema: FieldSchema<DefaultFieldDefinitions> = {
   id: {
     operators: [Operators.IS, Operators.IS_NOT],
     render: IDField,

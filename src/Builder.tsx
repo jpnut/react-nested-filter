@@ -6,6 +6,7 @@ import {
   FieldSchema,
   Components,
   FieldTypeDefinition,
+  DefaultFieldDefinitions,
 } from './types';
 import { initialState } from './utils';
 import { useFilter, createFilterContext } from './Context';
@@ -16,7 +17,9 @@ export interface Props<R extends string, F extends FieldTypeDefinition> {
   resource: R;
   schema: Schema<R, F>;
   components?: (defaultComponents: Components) => Components;
-  fieldSchema?: FieldSchema<F>;
+  fieldSchema?: (
+    defaultFieldSchema: FieldSchema<DefaultFieldDefinitions>
+  ) => FieldSchema<F>;
 }
 
 export const Builder = <R extends string, F extends FieldTypeDefinition>({

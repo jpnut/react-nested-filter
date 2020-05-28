@@ -1,6 +1,11 @@
 import React from 'react';
 import { defaultFieldSchema } from './fields';
-import { Components, FieldSchema, FieldTypeDefinition } from './types';
+import {
+  Components,
+  FieldSchema,
+  FieldTypeDefinition,
+  DefaultFieldDefinitions,
+} from './types';
 import { defaultComponents } from './components';
 
 export interface FilterState<F extends FieldTypeDefinition> {
@@ -9,10 +14,9 @@ export interface FilterState<F extends FieldTypeDefinition> {
 }
 
 export const createFilterContext = <F extends FieldTypeDefinition>() => {
-  const FilterContext = React.createContext<FilterState<F>>({
-    components: defaultComponents,
-    fieldSchema: defaultFieldSchema as FieldSchema<F>,
-  });
+  const FilterContext = React.createContext<FilterState<F> | undefined>(
+    undefined
+  );
 
   const useFilterContext = () => {
     const context = React.useContext(FilterContext);
@@ -28,7 +32,9 @@ export const createFilterContext = <F extends FieldTypeDefinition>() => {
 
 interface ConfigurableFilterState<F extends FieldTypeDefinition> {
   components?: (defaultComponents: Components) => Components;
-  fieldSchema?: FieldSchema<F>;
+  fieldSchema?: (
+    defaultFieldSchema: FieldSchema<DefaultFieldDefinitions>
+  ) => FieldSchema<F>;
 }
 
 export const useFilter = <F extends FieldTypeDefinition>({
@@ -38,6 +44,8 @@ export const useFilter = <F extends FieldTypeDefinition>({
   return {
     components:
       (components && components(defaultComponents)) || defaultComponents,
-    fieldSchema: fieldSchema || (defaultFieldSchema as FieldSchema<F>),
+    fieldSchema:
+      (fieldSchema && fieldSchema(defaultFieldSchema)) ||
+      ((defaultFieldSchema as unknown) as FieldSchema<F>),
   };
 };
