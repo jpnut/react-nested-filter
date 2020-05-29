@@ -9,7 +9,7 @@ import {
   DefaultFieldDefinitions,
 } from './types';
 import { initialState } from './utils';
-import { useFilter, createFilterContext } from './Context';
+import { useFilter } from './Context';
 
 export interface Props<R extends string, F extends FieldTypeDefinition> {
   onChange?: () => void;
@@ -33,36 +33,34 @@ export const Builder = <R extends string, F extends FieldTypeDefinition>({
 
   const [state, setState] = React.useState<State<R>>(memoizedState);
 
-  const { FilterContext, useFilterContext } = React.useMemo(
-    () => createFilterContext<F>(),
-    []
+  const { components, fieldSchema } = React.useMemo(
+    () =>
+      useFilter({
+        components: propComponents,
+        fieldSchema: propFieldSchema,
+      }),
+    [propComponents, propFieldSchema]
   );
-
-  const context = useFilter({
-    components: propComponents,
-    fieldSchema: propFieldSchema,
-  });
 
   const handleFilter = () => {
     onFilter(state);
   };
 
   return (
-    <FilterContext.Provider value={context}>
-      <context.components.Container>
-        <GroupComponent
-          key={state.root}
-          {...state.groups[state.root]}
-          group={state.root}
-          state={state}
-          setState={setState}
-          schema={schema}
-          useFilterContext={useFilterContext}
-        />
-        <context.components.FilterButton filter={handleFilter}>
-          Filter
-        </context.components.FilterButton>
-      </context.components.Container>
-    </FilterContext.Provider>
+    <components.Container>
+      <GroupComponent
+        key={state.root}
+        {...state.groups[state.root]}
+        group={state.root}
+        state={state}
+        setState={setState}
+        schema={schema}
+        components={components}
+        fieldSchema={fieldSchema}
+      />
+      <components.FilterButton filter={handleFilter}>
+        Filter
+      </components.FilterButton>
+    </components.Container>
   );
 };

@@ -141,13 +141,13 @@ export interface Components {
     removeGroup: () => void;
   }>;
   GroupOptionsContainer: React.ElementType;
-  AddGroupDropdown: React.ElementType<{
-    options: Record<string, string>;
-    addGroup: (resource: string) => void;
-  }>;
   InclusivityDropdown: React.ElementType<{
     inclusive: boolean;
     setInclusivity: (inclusivity: boolean) => void;
+  }>;
+  AddGroupDropdown: React.ElementType<{
+    options: Record<string, string>;
+    addGroup: (resource: string) => void;
   }>;
   AddRuleButton: React.ElementType<{
     addRule: () => void;

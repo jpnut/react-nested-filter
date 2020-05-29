@@ -19,6 +19,8 @@ export const createFilterContext = <F extends FieldTypeDefinition>() => {
   );
 
   const useFilterContext = () => {
+    console.log('use');
+
     const context = React.useContext(FilterContext);
 
     if (!context)

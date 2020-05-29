@@ -13,9 +13,10 @@ import {
   State,
   SubGroupOptions,
   FieldTypeDefinition,
+  Components,
+  FieldSchema,
 } from './types';
 import { Rule } from './Rule';
-import { FilterState } from './Context';
 
 interface Props<R extends string, F extends FieldTypeDefinition>
   extends GroupType<R> {
@@ -23,7 +24,8 @@ interface Props<R extends string, F extends FieldTypeDefinition>
   state: State<R>;
   setState: React.Dispatch<React.SetStateAction<State<R>>>;
   schema: Schema<R, F>;
-  useFilterContext: () => FilterState<F>;
+  components: Components;
+  fieldSchema: FieldSchema<F>;
 }
 
 export const Group = <R extends string, F extends FieldTypeDefinition>({
@@ -35,22 +37,20 @@ export const Group = <R extends string, F extends FieldTypeDefinition>({
   state,
   setState,
   schema,
-  useFilterContext,
+  components,
+  fieldSchema,
 }: Props<R, F>) => {
   const {
-    components: {
-      GroupContainer,
-      GroupHeader,
-      GroupTitle,
-      GroupRemoveButton,
-      GroupOptionsContainer,
-      AddGroupDropdown,
-      InclusivityDropdown,
-      AddRuleButton,
-      GroupRulesContainer,
-    },
-    fieldSchema,
-  } = useFilterContext();
+    GroupContainer,
+    GroupHeader,
+    GroupTitle,
+    GroupRemoveButton,
+    GroupOptionsContainer,
+    AddGroupDropdown,
+    InclusivityDropdown,
+    AddRuleButton,
+    GroupRulesContainer,
+  } = components;
 
   const fields = schema[resource].fields;
   const relations = schema[resource].relations;
@@ -97,11 +97,11 @@ export const Group = <R extends string, F extends FieldTypeDefinition>({
         <GroupRemoveButton removeGroup={handleRemoveGroup}>x</GroupRemoveButton>
       </GroupHeader>
       <GroupOptionsContainer>
-        <AddGroupDropdown addGroup={handleAddGroup} options={subGroupOptions} />
         <InclusivityDropdown
           inclusive={inclusive}
           setInclusivity={handleSetInclusivity}
         />
+        <AddGroupDropdown addGroup={handleAddGroup} options={subGroupOptions} />
         <AddRuleButton addRule={handleAddRule} />
       </GroupOptionsContainer>
       <GroupRulesContainer>
@@ -113,7 +113,8 @@ export const Group = <R extends string, F extends FieldTypeDefinition>({
             state={state}
             setState={setState}
             schema={schema}
-            useFilterContext={useFilterContext}
+            components={components}
+            fieldSchema={fieldSchema}
           />
         ))}
         {children.map(child => (
@@ -124,7 +125,8 @@ export const Group = <R extends string, F extends FieldTypeDefinition>({
             state={state}
             setState={setState}
             schema={schema}
-            useFilterContext={useFilterContext}
+            components={components}
+            fieldSchema={fieldSchema}
           />
         ))}
       </GroupRulesContainer>

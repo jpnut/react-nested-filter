@@ -37,6 +37,25 @@ export const defaultComponents: Components = {
       {children}
     </div>
   ),
+  InclusivityDropdown: ({ inclusive, setInclusivity, ...rest }) => {
+    const handleSetInclusivity = ({
+      target: { value },
+    }: React.ChangeEvent<HTMLSelectElement>) => {
+      setInclusivity(value === 'and');
+    };
+
+    return (
+      <select
+        className="rnf-builder__group-option rnf-builder__select"
+        value={inclusive ? 'and' : 'or'}
+        onChange={handleSetInclusivity}
+        {...rest}
+      >
+        <option value="and">AND</option>
+        <option value="or">OR</option>
+      </select>
+    );
+  },
   AddGroupDropdown: ({ addGroup, options, ...rest }) => {
     const handleAddGroup = ({
       target: { value },
@@ -61,25 +80,6 @@ export const defaultComponents: Components = {
             {options[option]}
           </option>
         ))}
-      </select>
-    );
-  },
-  InclusivityDropdown: ({ inclusive, setInclusivity, ...rest }) => {
-    const handleSetInclusivity = ({
-      target: { value },
-    }: React.ChangeEvent<HTMLSelectElement>) => {
-      setInclusivity(value === 'and');
-    };
-
-    return (
-      <select
-        className="rnf-builder__group-option rnf-builder__select"
-        value={inclusive ? 'and' : 'or'}
-        onChange={handleSetInclusivity}
-        {...rest}
-      >
-        <option value="and">AND</option>
-        <option value="or">OR</option>
       </select>
     );
   },

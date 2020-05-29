@@ -5,9 +5,10 @@ import {
   Schema,
   State,
   FieldTypeDefinition,
+  Components,
+  FieldSchema,
 } from './types';
 import { removeRule, updateRule, ruleInitializer, nullOperator } from './utils';
-import { FilterState } from './Context';
 
 interface Props<R extends string, F extends FieldTypeDefinition>
   extends RuleType {
@@ -15,7 +16,8 @@ interface Props<R extends string, F extends FieldTypeDefinition>
   state: State<R>;
   setState: React.Dispatch<React.SetStateAction<State<R>>>;
   schema: Schema<R, F>;
-  useFilterContext: () => FilterState<F>;
+  components: Components;
+  fieldSchema: FieldSchema<F>;
 }
 
 const startCase = (str: string) =>
@@ -33,12 +35,10 @@ export const Rule = <R extends string, F extends FieldTypeDefinition>({
   state,
   setState,
   schema,
-  useFilterContext,
+  components,
+  fieldSchema,
 }: Props<R, F>) => {
-  const {
-    components: { RuleContainer, RuleSelect, RuleField, RuleRemoveButton },
-    fieldSchema,
-  } = useFilterContext();
+  const { RuleContainer, RuleSelect, RuleField, RuleRemoveButton } = components;
 
   const resource = state.groups[group].resource;
   const fields = schema[resource].fields;
