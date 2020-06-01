@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { Operators } from '../types';
 import { operatorToString as defaultOperatorToString } from '../utils';
 
 interface Props {
-  operator: Operators;
-  setOperator: (operator: Operators) => void;
-  operators: Operators[];
-  operatorToString?: (operator: Operators) => string;
+  operator: string;
+  setOperator: (operator: string) => void;
+  operators: string[];
+  operatorToString?: (operator: string) => string;
 }
 
 export const OperatorSelect: React.SFC<Props> = ({
@@ -16,9 +15,9 @@ export const OperatorSelect: React.SFC<Props> = ({
   operatorToString = defaultOperatorToString,
 }) => {
   const handleChangeOperator = ({
-    target: { value: operator },
+    target: { value },
   }: React.ChangeEvent<HTMLSelectElement>) => {
-    setOperator(operator as Operators);
+    setOperator(value);
   };
 
   return (

@@ -215,7 +215,7 @@ const ruleInitializer = <R extends string, F extends FieldTypeDefinition>(
   };
 };
 
-const operatorToString = (operator: Operators) => {
+const operatorToString = (operator: string) => {
   switch (operator) {
     case Operators.IS:
       return 'equals';
@@ -249,10 +249,12 @@ const operatorToString = (operator: Operators) => {
       return 'is null';
     case Operators.NOT_NULL:
       return 'is not null';
+    default:
+      return operator;
   }
 };
 
-const nullOperator = (operator: Operators) =>
+const nullOperator = (operator: string) =>
   operator === Operators.NULL || operator === Operators.NOT_NULL;
 
 const isNil = (value: any) => value === null || value === undefined;

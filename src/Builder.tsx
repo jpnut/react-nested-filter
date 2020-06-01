@@ -8,7 +8,7 @@ import {
   FieldTypeDefinition,
   DefaultFieldDefinitions,
 } from './types';
-import { initialState } from './utils';
+import { initialState, nullOperator } from './utils';
 import { useFilter } from './Context';
 
 export interface Props<R extends string, F extends FieldTypeDefinition> {
@@ -20,6 +20,7 @@ export interface Props<R extends string, F extends FieldTypeDefinition> {
   fieldSchema?: (
     defaultFieldSchema: FieldSchema<DefaultFieldDefinitions>
   ) => FieldSchema<F>;
+  isNullOperator?: (operator: string) => boolean;
 }
 
 export const Builder = <R extends string, F extends FieldTypeDefinition>({
@@ -28,6 +29,7 @@ export const Builder = <R extends string, F extends FieldTypeDefinition>({
   fieldSchema: propFieldSchema,
   onFilter,
   schema,
+  isNullOperator = nullOperator,
 }: Props<R, F>) => {
   const memoizedState = React.useMemo(() => initialState(resource), []);
 
@@ -57,6 +59,7 @@ export const Builder = <R extends string, F extends FieldTypeDefinition>({
         schema={schema}
         components={components}
         fieldSchema={fieldSchema}
+        isNullOperator={isNullOperator}
       />
       <components.FilterButton filter={handleFilter}>
         Filter

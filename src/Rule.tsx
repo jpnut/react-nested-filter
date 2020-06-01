@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  Operators,
   Rule as RuleType,
   Schema,
   State,
@@ -8,7 +7,7 @@ import {
   Components,
   FieldSchema,
 } from './types';
-import { removeRule, updateRule, ruleInitializer, nullOperator } from './utils';
+import { removeRule, updateRule, ruleInitializer } from './utils';
 
 interface Props<R extends string, F extends FieldTypeDefinition>
   extends RuleType {
@@ -18,6 +17,7 @@ interface Props<R extends string, F extends FieldTypeDefinition>
   schema: Schema<R, F>;
   components: Components;
   fieldSchema: FieldSchema<F>;
+  isNullOperator: (operator: string) => boolean;
 }
 
 const startCase = (str: string) =>
@@ -37,6 +37,7 @@ export const Rule = <R extends string, F extends FieldTypeDefinition>({
   schema,
   components,
   fieldSchema,
+  isNullOperator,
 }: Props<R, F>) => {
   const { RuleContainer, RuleSelect, RuleField, RuleRemoveButton } = components;
 
@@ -57,8 +58,8 @@ export const Rule = <R extends string, F extends FieldTypeDefinition>({
     setState(updateRule(state, rule, newRule));
   };
 
-  const setOperator = (operator: Operators) => {
-    const newValue = nullOperator(operator) ? null : value;
+  const setOperator = (operator: string) => {
+    const newValue = isNullOperator(operator) ? null : value;
 
     setState(updateRule(state, rule, { operator, value: newValue }));
   };

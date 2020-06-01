@@ -26,6 +26,7 @@ interface Props<R extends string, F extends FieldTypeDefinition>
   schema: Schema<R, F>;
   components: Components;
   fieldSchema: FieldSchema<F>;
+  isNullOperator: (operator: string) => boolean;
 }
 
 export const Group = <R extends string, F extends FieldTypeDefinition>({
@@ -39,6 +40,7 @@ export const Group = <R extends string, F extends FieldTypeDefinition>({
   schema,
   components,
   fieldSchema,
+  isNullOperator,
 }: Props<R, F>) => {
   const {
     GroupContainer,
@@ -115,6 +117,7 @@ export const Group = <R extends string, F extends FieldTypeDefinition>({
             schema={schema}
             components={components}
             fieldSchema={fieldSchema}
+            isNullOperator={isNullOperator}
           />
         ))}
         {children.map(child => (
@@ -127,6 +130,7 @@ export const Group = <R extends string, F extends FieldTypeDefinition>({
             schema={schema}
             components={components}
             fieldSchema={fieldSchema}
+            isNullOperator={isNullOperator}
           />
         ))}
       </GroupRulesContainer>

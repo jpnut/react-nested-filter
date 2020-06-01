@@ -6,7 +6,7 @@ import {
 } from '../utils';
 import { OperatorSelect } from './OperatorSelect';
 
-const operatorToString = (operator: Operators) => {
+const operatorToString = (operator: string) => {
   switch (operator) {
     case Operators.IS:
       return 'is';

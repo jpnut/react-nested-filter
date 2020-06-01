@@ -36,7 +36,7 @@ export type FieldTypeDefinition = {
 };
 
 type BaseFieldDefinition = {
-  operators: Operators[];
+  operators: string[];
   defaultValue?: () => any;
 };
 
@@ -92,7 +92,7 @@ export interface Group<R extends string> {
 export interface Rule {
   group: string;
   name: string;
-  operator: Operators;
+  operator: string;
   value?: any;
 }
 
@@ -109,15 +109,15 @@ export interface State<R extends string> {
 export interface FieldProps {
   value?: any;
   setValue: (value?: any) => void;
-  operator: Operators;
-  setOperator: (operator: Operators) => void;
-  operators: Operators[];
+  operator: string;
+  setOperator: (operator: string) => void;
+  operators: string[];
 }
 
 export type SubGroupOptions<R extends string> = { [x in R]: string };
 
 export interface FilterObject {
-  operator: Operators;
+  operator: string;
   value?: any;
 }
 
