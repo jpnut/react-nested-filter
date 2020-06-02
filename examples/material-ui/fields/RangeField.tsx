@@ -16,7 +16,15 @@ export const RangeField: React.SFC<FieldProps & NumberFieldProps> = ({
   min,
   max,
 }) => {
+  const [state, setState] = React.useState(value);
+
   const handleChange = (event, newValue: number) => {
+    setState(newValue);
+
+    handleValueChange(newValue);
+  };
+
+  const handleValueChange = (newValue: number) => {
     if (isNil(newValue)) {
       return setValue(undefined);
     }
@@ -37,7 +45,7 @@ export const RangeField: React.SFC<FieldProps & NumberFieldProps> = ({
       />
       <Box display="flex" flex={1} style={styles}>
         <Slider
-          value={isNil(value) ? 0 : value}
+          value={isNil(state) ? 0 : state}
           onChange={handleChange}
           step={step}
           min={min}

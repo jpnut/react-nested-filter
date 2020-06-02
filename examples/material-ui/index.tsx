@@ -8,6 +8,7 @@ import {
   Paper,
   NativeSelect,
   Typography,
+  makeStyles,
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -27,6 +28,17 @@ import {
   RangeField,
   StringField,
 } from './fields';
+
+const useRulesContainerStyles = makeStyles({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    '& .group': {
+      padding: '1rem',
+      borderLeft: '1px solid #f1f1f1',
+    },
+  },
+});
 
 type CustomTypes = {
   range: NumberFieldProps;
@@ -95,7 +107,9 @@ const App = (
           FilterButton: ({ children, filter }) => (
             <Button onClick={filter}>{children}</Button>
           ),
-          GroupContainer: ({ children }) => <Box>{children}</Box>,
+          GroupContainer: ({ children }) => (
+            <Box className="group">{children}</Box>
+          ),
           GroupHeader: ({ children }) => (
             <Box display="flex" justifyContent="space-between" mb={2}>
               {children}
@@ -149,6 +163,7 @@ const App = (
 
             const handleResourceSelect = (resource: string) => {
               addGroup(resource);
+              handleClose();
             };
 
             return (
@@ -170,11 +185,10 @@ const App = (
               Add Rule
             </Button>
           ),
-          GroupRulesContainer: ({ children }) => (
-            <Box display="flex" flexDirection="column">
-              {children}
-            </Box>
-          ),
+          GroupRulesContainer: ({ children }) => {
+            const classes = useRulesContainerStyles();
+            return <Box className={classes.root}>{children}</Box>;
+          },
           RuleContainer: ({ children }) => (
             <Box
               borderRadius="3px"

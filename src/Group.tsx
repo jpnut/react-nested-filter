@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Rule } from './Rule';
 import {
   addGroup,
   addRule,
@@ -15,33 +16,39 @@ import {
   FieldTypeDefinition,
   Components,
   FieldSchema,
+  Rule as RuleType,
 } from './types';
-import { Rule } from './Rule';
 
 interface Props<R extends string, F extends FieldTypeDefinition>
   extends GroupType<R> {
   group: string;
-  state: State<R>;
-  setState: React.Dispatch<React.SetStateAction<State<R>>>;
+  setState: (callback: (state: State<R>) => State<R>) => void;
   schema: Schema<R, F>;
   components: Components;
   fieldSchema: FieldSchema<F>;
   isNullOperator: (operator: string) => boolean;
+  getGroup: (key: string) => GroupType<R>;
+  getRule: (key: string) => RuleType;
 }
 
-export const Group = <R extends string, F extends FieldTypeDefinition>({
-  children,
-  rules,
-  inclusive,
-  resource,
-  group,
-  state,
-  setState,
-  schema,
-  components,
-  fieldSchema,
-  isNullOperator,
-}: Props<R, F>) => {
+export const Group = <R extends string, F extends FieldTypeDefinition>(
+  props: Props<R, F>
+) => {
+  const {
+    children,
+    rules,
+    inclusive,
+    resource,
+    group,
+    setState,
+    schema,
+    components,
+    fieldSchema,
+    isNullOperator,
+    getGroup,
+    getRule,
+  } = props;
+
   const {
     GroupContainer,
     GroupHeader,
@@ -62,11 +69,11 @@ export const Group = <R extends string, F extends FieldTypeDefinition>({
   } as SubGroupOptions<R>;
 
   const handleSetInclusivity = (newInclusive: boolean) => {
-    setState(updateGroup(state, group, { inclusive: newInclusive }));
+    setState(state => updateGroup(state, group, { inclusive: newInclusive }));
   };
 
   const handleRemoveGroup = () => {
-    setState(removeGroup(state, group));
+    setState(state => removeGroup(state, group));
   };
 
   const handleAddRule = () => {
@@ -85,11 +92,11 @@ export const Group = <R extends string, F extends FieldTypeDefinition>({
       return;
     }
 
-    setState(addRule(state, { group, ...rule }));
+    setState(state => addRule(state, { group, ...rule }));
   };
 
   const handleAddGroup = (value: string) => {
-    setState(addGroup(state, value as R, group));
+    setState(state => addGroup(state, value as R, group));
   };
 
   return (
@@ -110,27 +117,28 @@ export const Group = <R extends string, F extends FieldTypeDefinition>({
         {rules.map(rule => (
           <Rule
             key={rule}
-            {...state.rules[rule]}
+            {...getRule(rule)}
             rule={rule}
-            state={state}
             setState={setState}
             schema={schema}
             components={components}
             fieldSchema={fieldSchema}
             isNullOperator={isNullOperator}
+            getGroup={getGroup}
           />
         ))}
         {children.map(child => (
           <Group
             key={child}
-            {...state.groups[child]}
+            {...getGroup(child)}
             group={child}
-            state={state}
             setState={setState}
             schema={schema}
             components={components}
             fieldSchema={fieldSchema}
             isNullOperator={isNullOperator}
+            getGroup={getGroup}
+            getRule={getRule}
           />
         ))}
       </GroupRulesContainer>

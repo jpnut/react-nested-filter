@@ -6,18 +6,19 @@ import {
   FieldTypeDefinition,
   Components,
   FieldSchema,
+  Group,
 } from './types';
 import { removeRule, updateRule, ruleInitializer } from './utils';
 
 interface Props<R extends string, F extends FieldTypeDefinition>
   extends RuleType {
   rule: string;
-  state: State<R>;
-  setState: React.Dispatch<React.SetStateAction<State<R>>>;
+  setState: (callback: (state: State<R>) => State<R>) => void;
   schema: Schema<R, F>;
   components: Components;
   fieldSchema: FieldSchema<F>;
   isNullOperator: (operator: string) => boolean;
+  getGroup: (key: string) => Group<R>;
 }
 
 const startCase = (str: string) =>
@@ -32,16 +33,15 @@ export const Rule = <R extends string, F extends FieldTypeDefinition>({
   operator,
   value,
   rule,
-  state,
   setState,
   schema,
   components,
   fieldSchema,
   isNullOperator,
+  getGroup,
 }: Props<R, F>) => {
   const { RuleContainer, RuleSelect, RuleField, RuleRemoveButton } = components;
-
-  const resource = state.groups[group].resource;
+  const { resource } = getGroup(group);
   const fields = schema[resource].fields;
 
   if (!fields) {
@@ -55,21 +55,21 @@ export const Rule = <R extends string, F extends FieldTypeDefinition>({
       return;
     }
 
-    setState(updateRule(state, rule, newRule));
+    setState(state => updateRule(state, rule, newRule));
   };
 
   const setOperator = (operator: string) => {
     const newValue = isNullOperator(operator) ? null : value;
 
-    setState(updateRule(state, rule, { operator, value: newValue }));
+    setState(state => updateRule(state, rule, { operator, value: newValue }));
   };
 
   const setValue = (value?: any) => {
-    setState(updateRule(state, rule, { value }));
+    setState(state => updateRule(state, rule, { value }));
   };
 
   const handleRemoveRule = () => {
-    setState(removeRule(state, rule));
+    setState(state => removeRule(state, rule));
   };
 
   const Field = fieldSchema && fieldSchema[fields[name].type];

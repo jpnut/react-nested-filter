@@ -104,6 +104,7 @@ export interface State<R extends string> {
   groups: Groups<R>;
   rules: Rules;
   root: string;
+  counter: number;
 }
 
 export interface FieldProps {

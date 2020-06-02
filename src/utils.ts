@@ -10,17 +10,15 @@ import {
   FieldTypeDefinition,
 } from './types';
 
-let counter = 0;
-
-const createKeyedRule = (rule: Rule): Rules => ({
+const createKeyedRule = (rule: Rule, counter: number): Rules => ({
   [counter++]: rule,
 });
 
 const addRule = <R extends string>(
-  { groups, rules, ...state }: State<R>,
+  { groups, rules, counter, ...state }: State<R>,
   { group, ...rest }: Rule
 ): State<R> => {
-  const newRule = createKeyedRule({ group, ...rest });
+  const newRule = createKeyedRule({ group, ...rest }, counter);
 
   return {
     groups: {
@@ -34,6 +32,7 @@ const addRule = <R extends string>(
       ...rules,
       ...newRule,
     },
+    counter: counter + 1,
     ...state,
   };
 };
@@ -92,17 +91,18 @@ const createGroup = <R extends string>(
 
 const createKeyedGroup = <R extends string>(
   resource: R,
+  counter: number,
   parent?: string
 ): Groups<R> => ({
   [counter++]: createGroup(resource, parent),
 });
 
 const addGroup = <R extends string>(
-  { groups, ...state }: State<R>,
+  { groups, counter, ...state }: State<R>,
   resource: R,
   parent: string
 ): State<R> => {
-  const newGroup = createKeyedGroup(resource, parent);
+  const newGroup = createKeyedGroup(resource, counter, parent);
   const keys = Object.keys(newGroup);
 
   return {
@@ -114,6 +114,7 @@ const addGroup = <R extends string>(
       },
       ...newGroup,
     },
+    counter: counter + 1,
     ...state,
   };
 };
@@ -177,14 +178,52 @@ const removeGroup = <R extends string>(
 };
 
 const initialState = <R extends string>(resource: R): State<R> => {
-  const groups = createKeyedGroup(resource);
+  const groups = createKeyedGroup(resource, 0);
   const root = Object.keys(groups)[0];
 
   return {
     groups,
     rules: {},
     root,
+    counter: 1,
   };
+};
+
+interface Branch {
+  id: string;
+  type: 'group';
+  children: (Branch | Leaf)[];
+}
+
+interface Leaf extends Rule {
+  id: string;
+  type: 'rule';
+}
+
+const ruleToLeaf = <R extends string>(key: string, state: State<R>): Leaf => ({
+  id: key,
+  type: 'rule',
+  ...state.rules[key],
+});
+
+const groupToBranch = <R extends string>(
+  key: string,
+  state: State<R>
+): Branch => {
+  const group = state.groups[key];
+
+  return {
+    id: key,
+    type: 'group',
+    children: [
+      ...group.rules.map(rule => ruleToLeaf(rule, state)),
+      ...group.children.map(child => groupToBranch(child, state)),
+    ],
+  };
+};
+
+const toTree = <R extends string>(state: State<R>): Branch => {
+  return groupToBranch(state.root, state);
 };
 
 const ruleInitializer = <R extends string, F extends FieldTypeDefinition>(
@@ -205,12 +244,11 @@ const ruleInitializer = <R extends string, F extends FieldTypeDefinition>(
     return;
   }
 
-  const defaultValueFunc =
-    fieldSchema[field.type as keyof FieldSchema<F>].defaultValue;
+  const defaultValueFunc = fieldSchema[field.type].defaultValue;
 
   return {
     name,
-    operator: fieldSchema[field.type as keyof FieldSchema<F>].operators[0],
+    operator: fieldSchema[field.type].operators[0],
     value: (defaultValueFunc && defaultValueFunc()) || undefined,
   };
 };
@@ -271,6 +309,7 @@ const invert = (obj: { [x: string]: string }) => {
 
 export {
   addRule,
+  createKeyedRule,
   updateRule,
   removeRule,
   createGroup,
@@ -284,4 +323,5 @@ export {
   nullOperator,
   isNil,
   invert,
+  toTree,
 };
