@@ -6,8 +6,6 @@ import {
   Schema,
   defaultFieldSchema,
   ruleInitializer,
-} from '../src';
-import {
   initialState,
   addGroup,
   updateGroup,
@@ -15,7 +13,7 @@ import {
   addRule,
   updateRule,
   removeRule,
-} from '../src/immutable-utils';
+} from '../src';
 
 describe('Rule Initialiser', () => {
   const schema: Schema<'product', DefaultFieldDefinitions> = {
