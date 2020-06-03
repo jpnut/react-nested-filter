@@ -1,24 +1,17 @@
 import * as React from 'react';
-import {
-  Rule as RuleType,
-  Schema,
-  State,
-  FieldTypeDefinition,
-  Components,
-  FieldSchema,
-  Group,
-} from './types';
-import { removeRule, updateRule, ruleInitializer } from './utils';
+import { Record } from 'immutable';
+import { Schema, FieldTypeDefinition, Components, FieldSchema } from './types';
+import { ruleInitializer } from './utils';
+import { Leaf, State, removeRule, updateRule } from './immutable-utils';
 
-interface Props<R extends string, F extends FieldTypeDefinition>
-  extends RuleType {
-  rule: string;
-  setState: (callback: (state: State<R>) => State<R>) => void;
+interface Props<R extends string, F extends FieldTypeDefinition> {
+  rule: Record<Leaf>;
+  resource: R;
+  setState: (callback: (state: Record<State>) => Record<State>) => void;
   schema: Schema<R, F>;
   components: Components;
   fieldSchema: FieldSchema<F>;
   isNullOperator: (operator: string) => boolean;
-  getGroup: (key: string) => Group<R>;
 }
 
 const startCase = (str: string) =>
@@ -27,83 +20,104 @@ const startCase = (str: string) =>
     txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
   );
 
-export const Rule = <R extends string, F extends FieldTypeDefinition>({
-  group,
-  name,
-  operator,
-  value,
-  rule,
-  setState,
-  schema,
-  components,
-  fieldSchema,
-  isNullOperator,
-  getGroup,
-}: Props<R, F>) => {
-  const { RuleContainer, RuleSelect, RuleField, RuleRemoveButton } = components;
-  const { resource } = getGroup(group);
-  const fields = schema[resource].fields;
-
-  if (!fields) {
-    return null;
+export class Rule<
+  R extends string,
+  F extends FieldTypeDefinition
+> extends React.PureComponent<Props<R, F>> {
+  constructor(props: Props<R, F>) {
+    super(props);
   }
 
-  const handleChangeField = (field: string) => {
+  public handleChangeField = (field: string) => {
+    const { schema, fieldSchema, resource, setState, rule } = this.props;
+
     const newRule = ruleInitializer(schema, fieldSchema, resource, field);
 
     if (!newRule) {
       return;
     }
 
-    setState(state => updateRule(state, rule, newRule));
+    setState(state => updateRule(state, rule.get('path'), newRule));
   };
 
-  const setOperator = (operator: string) => {
-    const newValue = isNullOperator(operator) ? null : value;
+  public setOperator = (operator: string) => {
+    const { isNullOperator, setState, rule } = this.props;
 
-    setState(state => updateRule(state, rule, { operator, value: newValue }));
+    const newValue = isNullOperator(operator) ? null : rule.get('value');
+
+    setState(state =>
+      updateRule(state, rule.get('path'), { operator, value: newValue })
+    );
   };
 
-  const setValue = (value?: any) => {
-    setState(state => updateRule(state, rule, { value }));
+  public setValue = (value?: any) => {
+    const { setState, rule } = this.props;
+
+    setState(state => updateRule(state, rule.get('path'), { value }));
   };
 
-  const handleRemoveRule = () => {
-    setState(state => removeRule(state, rule));
+  public handleRemoveRule = () => {
+    const { setState, rule } = this.props;
+
+    setState(state => removeRule(state, rule.get('path')));
   };
 
-  const Field = fieldSchema && fieldSchema[fields[name].type];
+  public render() {
+    const {
+      props: {
+        components: { RuleContainer, RuleSelect, RuleField, RuleRemoveButton },
+        resource,
+        schema,
+        fieldSchema,
+        rule,
+      },
+    } = this;
 
-  if (!Field) {
-    return null;
-  }
+    const name = rule.get('name');
+    const value = rule.get('value');
+    const operator = rule.get('operator');
 
-  const fieldOptions = Object.keys(fields).map(key => ({
-    key,
-    value: fields[key].name || startCase(key),
-  }));
+    const fields = schema[resource].fields;
 
-  const props = fields[name].fieldProps;
+    if (!fields) {
+      return null;
+    }
 
-  return (
-    <RuleContainer>
-      <RuleSelect
-        resource={resource}
-        field={name}
-        setRuleField={handleChangeField}
-        options={fieldOptions}
-      />
-      <RuleField>
-        <Field.render
-          value={value}
-          setValue={setValue}
-          operator={operator}
-          setOperator={setOperator}
-          operators={Field.operators}
-          {...(props as F[keyof F])}
+    const Field = fieldSchema && fieldSchema[fields[name].type];
+
+    if (!Field) {
+      return null;
+    }
+
+    const fieldOptions = Object.keys(fields).map(key => ({
+      key,
+      value: fields[key].name || startCase(key),
+    }));
+
+    const props = fields[name].fieldProps;
+
+    return (
+      <RuleContainer>
+        <RuleSelect
+          resource={resource}
+          field={name}
+          setRuleField={this.handleChangeField}
+          options={fieldOptions}
         />
-      </RuleField>
-      <RuleRemoveButton removeRule={handleRemoveRule}>x</RuleRemoveButton>
-    </RuleContainer>
-  );
-};
+        <RuleField>
+          <Field.render
+            value={value}
+            setValue={this.setValue}
+            operator={operator}
+            setOperator={this.setOperator}
+            operators={Field.operators}
+            {...(props as F[keyof F])}
+          />
+        </RuleField>
+        <RuleRemoveButton removeRule={this.handleRemoveRule}>
+          x
+        </RuleRemoveButton>
+      </RuleContainer>
+    );
+  }
+}

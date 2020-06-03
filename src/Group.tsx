@@ -1,52 +1,42 @@
 import * as React from 'react';
+import { Record } from 'immutable';
 import { Rule } from './Rule';
+import { invert, ruleInitializer } from './utils';
 import {
-  addGroup,
-  addRule,
-  invert,
-  removeGroup,
-  ruleInitializer,
-  updateGroup,
-} from './utils';
-import {
-  Group as GroupType,
-  Schema,
-  State,
-  SubGroupOptions,
-  FieldTypeDefinition,
   Components,
   FieldSchema,
-  Rule as RuleType,
+  FieldTypeDefinition,
+  Schema,
+  SubGroupOptions,
 } from './types';
+import {
+  Branch,
+  State,
+  addGroup,
+  addRule,
+  removeGroup,
+  updateGroup,
+} from './immutable-utils';
 
-interface Props<R extends string, F extends FieldTypeDefinition>
-  extends GroupType<R> {
-  group: string;
-  setState: (callback: (state: State<R>) => State<R>) => void;
+interface Props<R extends string, F extends FieldTypeDefinition> {
+  group: Record<Branch>;
+  setState: (callback: (state: Record<State>) => Record<State>) => void;
   schema: Schema<R, F>;
   components: Components;
   fieldSchema: FieldSchema<F>;
   isNullOperator: (operator: string) => boolean;
-  getGroup: (key: string) => GroupType<R>;
-  getRule: (key: string) => RuleType;
 }
 
 export const Group = <R extends string, F extends FieldTypeDefinition>(
   props: Props<R, F>
 ) => {
   const {
-    children,
-    rules,
-    inclusive,
-    resource,
     group,
     setState,
     schema,
     components,
     fieldSchema,
     isNullOperator,
-    getGroup,
-    getRule,
   } = props;
 
   const {
@@ -61,6 +51,7 @@ export const Group = <R extends string, F extends FieldTypeDefinition>(
     GroupRulesContainer,
   } = components;
 
+  const resource = group.get('resource') as R;
   const fields = schema[resource].fields;
   const relations = schema[resource].relations;
   const subGroupOptions = {
@@ -69,11 +60,13 @@ export const Group = <R extends string, F extends FieldTypeDefinition>(
   } as SubGroupOptions<R>;
 
   const handleSetInclusivity = (newInclusive: boolean) => {
-    setState(state => updateGroup(state, group, { inclusive: newInclusive }));
+    setState(state =>
+      updateGroup(state, group.get('path'), { inclusive: newInclusive })
+    );
   };
 
   const handleRemoveGroup = () => {
-    setState(state => removeGroup(state, group));
+    setState(state => removeGroup(state, group.get('path')));
   };
 
   const handleAddRule = () => {
@@ -92,12 +85,15 @@ export const Group = <R extends string, F extends FieldTypeDefinition>(
       return;
     }
 
-    setState(state => addRule(state, { group, ...rule }));
+    setState(state => addRule(state, rule, group.get('path')));
   };
 
   const handleAddGroup = (value: string) => {
-    setState(state => addGroup(state, value as R, group));
+    setState(state => addGroup(state, value as R, group.get('path')));
   };
+
+  const rules = group.get('rules');
+  const groups = group.get('groups');
 
   return (
     <GroupContainer>
@@ -107,38 +103,34 @@ export const Group = <R extends string, F extends FieldTypeDefinition>(
       </GroupHeader>
       <GroupOptionsContainer>
         <InclusivityDropdown
-          inclusive={inclusive}
+          inclusive={group.get('inclusive')}
           setInclusivity={handleSetInclusivity}
         />
         <AddGroupDropdown addGroup={handleAddGroup} options={subGroupOptions} />
         <AddRuleButton addRule={handleAddRule} />
       </GroupOptionsContainer>
       <GroupRulesContainer>
-        {rules.map(rule => (
+        {Object.keys(rules).map(key => (
           <Rule
-            key={rule}
-            {...getRule(rule)}
-            rule={rule}
+            key={key}
+            rule={rules[key]}
+            resource={resource}
             setState={setState}
             schema={schema}
             components={components}
             fieldSchema={fieldSchema}
             isNullOperator={isNullOperator}
-            getGroup={getGroup}
           />
         ))}
-        {children.map(child => (
+        {Object.keys(groups).map(key => (
           <Group
-            key={child}
-            {...getGroup(child)}
-            group={child}
+            key={key}
+            group={groups[key]}
             setState={setState}
             schema={schema}
             components={components}
             fieldSchema={fieldSchema}
             isNullOperator={isNullOperator}
-            getGroup={getGroup}
-            getRule={getRule}
           />
         ))}
       </GroupRulesContainer>

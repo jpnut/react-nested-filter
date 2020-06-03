@@ -107,6 +107,18 @@ export interface State<R extends string> {
   counter: number;
 }
 
+export interface Branch<R> {
+  id: string;
+  inclusive: boolean;
+  resource: R;
+  rules: Leaf[];
+  groups: Branch<R>[];
+}
+
+export interface Leaf extends Rule {
+  id: string;
+}
+
 export interface FieldProps {
   value?: any;
   setValue: (value?: any) => void;

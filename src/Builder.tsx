@@ -1,19 +1,20 @@
 import * as React from 'react';
+import { Record } from 'immutable';
 import { Group as GroupComponent } from './Group';
 import {
   Schema,
-  State,
   FieldSchema,
   Components,
   FieldTypeDefinition,
   DefaultFieldDefinitions,
 } from './types';
-import { initialState, nullOperator } from './utils';
+import { nullOperator } from './utils';
 import { useFilter } from './use-filter';
+import { State, initialState } from './immutable-utils';
 
 interface BaseProps<R extends string, F extends FieldTypeDefinition> {
-  onChange?: (state: State<R>) => void;
-  onFilter: (state: State<R>) => void;
+  onChange?: (state: Record<State>) => void;
+  onFilter: (state: Record<State>) => void;
   resource: R;
   schema: Schema<R, F>;
   components?: (defaultComponents: Components) => Components;
@@ -27,16 +28,16 @@ type ControlledProps<
   R extends string,
   F extends FieldTypeDefinition
 > = BaseProps<R, F> & {
-  state: State<R>;
-  setState: React.Dispatch<React.SetStateAction<State<R>>>;
+  state: Record<State>;
+  setState: React.Dispatch<React.SetStateAction<Record<State>>>;
 };
 
 export type Props<R extends string, F extends FieldTypeDefinition> =
   | BaseProps<R, F>
   | ControlledProps<R, F>;
 
-interface BuilderState<R extends string> {
-  state: State<R>;
+interface BuilderState {
+  state: Record<State>;
 }
 
 const initialStateFromProps = <R extends string, F extends FieldTypeDefinition>(
@@ -51,7 +52,7 @@ const initialStateFromProps = <R extends string, F extends FieldTypeDefinition>(
 export class Builder<
   R extends string,
   F extends FieldTypeDefinition
-> extends React.Component<Props<R, F>, BuilderState<R>> {
+> extends React.Component<Props<R, F>, BuilderState> {
   public components: Components;
 
   public fieldSchema: FieldSchema<F>;
@@ -86,7 +87,7 @@ export class Builder<
 
   public componentDidUpdate(
     { components, fieldSchema }: Props<R, F>,
-    { state: prevState }: BuilderState<R>
+    { state: prevState }: BuilderState
   ) {
     if (prevState !== this.state.state) {
       this.onChange();
@@ -106,13 +107,13 @@ export class Builder<
     }
   }
 
-  public setQueryState = (state: State<R>) => {
+  public setQueryState = (state: Record<State>) => {
     this.setState({
       state,
     });
   };
 
-  public updateState = (callback: (state: State<R>) => State<R>) => {
+  public updateState = (callback: (state: Record<State>) => Record<State>) => {
     const setState =
       'setState' in this.props ? this.props.setState : this.setQueryState;
 
@@ -131,10 +132,6 @@ export class Builder<
     this.props.onFilter(this.state.state);
   };
 
-  public getGroup = (key: string) => this.state.state.groups[key];
-
-  public getRule = (key: string) => this.state.state.rules[key];
-
   public render() {
     const {
       components,
@@ -143,19 +140,18 @@ export class Builder<
       state: { state },
     } = this;
 
+    const group = state.get('tree');
+
     return (
       <components.Container>
         <GroupComponent
-          key={state.root}
-          {...state.groups[state.root]}
-          group={state.root}
+          key={group.get('id')}
+          group={group}
           setState={this.updateState}
           schema={schema}
           components={components}
           fieldSchema={fieldSchema}
           isNullOperator={isNullOperator}
-          getGroup={this.getGroup}
-          getRule={this.getRule}
         />
         <components.FilterButton filter={this.handleFilter}>
           Filter
