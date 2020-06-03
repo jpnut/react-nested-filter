@@ -1,3 +1,5 @@
+import { Record as IRecord } from 'immutable';
+
 export interface NumberFieldProps {
   step?: number;
   min?: number;
@@ -100,23 +102,37 @@ export type Groups<R extends string> = { [x: string]: Group<R> };
 
 export type Rules = { [x: string]: Rule };
 
-export interface State<R extends string> {
-  groups: Groups<R>;
-  rules: Rules;
-  root: string;
+export interface State {
   counter: number;
+  tree: Branch;
 }
 
-export interface Branch<R> {
+export interface StateRecord {
+  counter: number;
+  tree: IRecord<BranchRecord>;
+}
+
+export interface Branch {
   id: string;
   inclusive: boolean;
-  resource: R;
-  rules: Leaf[];
-  groups: Branch<R>[];
+  resource: string;
+  rules: Record<string, Leaf>;
+  groups: Record<string, Branch>;
+  path: string[];
 }
 
-export interface Leaf extends Rule {
+export interface BranchRecord {
   id: string;
+  inclusive: boolean;
+  resource: string;
+  rules: Record<string, IRecord<Leaf>>;
+  groups: Record<string, IRecord<BranchRecord>>;
+  path: string[];
+}
+
+export interface Leaf extends Omit<Rule, 'group'> {
+  id: string;
+  path: string[];
 }
 
 export interface FieldProps {

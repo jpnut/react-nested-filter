@@ -1,10 +1,136 @@
+import { Record as IRecord } from 'immutable';
 import {
   FieldSchema,
   Operators,
   Rule,
   Schema,
   FieldTypeDefinition,
+  StateRecord,
+  BranchRecord,
+  Leaf,
 } from './types';
+
+const Branch = IRecord<BranchRecord>(({
+  id: undefined,
+  inclusive: true,
+  resource: undefined,
+  rules: {},
+  groups: {},
+  path: [],
+} as unknown) as BranchRecord);
+
+const Leaf = IRecord<Leaf>(({
+  id: undefined,
+  name: undefined,
+  operator: undefined,
+  value: undefined,
+  path: [],
+} as unknown) as Leaf);
+
+const State = IRecord<StateRecord>({
+  counter: 0,
+  tree: Branch(),
+});
+
+const createGroup = <R extends string>(
+  resource: R,
+  id: string,
+  path: string[]
+): IRecord<BranchRecord> => {
+  return Branch({
+    id,
+    inclusive: true,
+    resource,
+    rules: {},
+    groups: {},
+    path,
+  });
+};
+
+const addGroup = <R extends string>(
+  state: IRecord<StateRecord>,
+  resource: R,
+  basePath: string[]
+): IRecord<StateRecord> => {
+  const id = state.get('counter');
+  const path = [...basePath, 'groups', `${id}`];
+
+  return state
+    .set('counter', id + 1)
+    .setIn(path, createGroup(resource, `${id}`, path));
+};
+
+const updateGroup = (
+  state: IRecord<StateRecord>,
+  path: string[],
+  properties: Pick<BranchRecord, 'inclusive'>
+): IRecord<StateRecord> => {
+  return state.updateIn(path, (group: IRecord<BranchRecord>) =>
+    group.merge(properties)
+  );
+};
+
+const removeGroup = (
+  state: IRecord<StateRecord>,
+  path: string[]
+): IRecord<StateRecord> => {
+  if (path.length <= 1) {
+    return state;
+  }
+
+  return state.removeIn(path);
+};
+
+const createRule = (
+  id: string,
+  path: string[],
+  rule: Omit<Rule, 'group'>
+): IRecord<Leaf> => {
+  return Leaf({
+    id,
+    path,
+    ...rule,
+  });
+};
+
+const addRule = (
+  state: IRecord<StateRecord>,
+  rule: Omit<Rule, 'group'>,
+  basePath: string[]
+): IRecord<StateRecord> => {
+  const id = state.get('counter');
+  const path = [...basePath, 'rules', `${id}`];
+
+  return state
+    .set('counter', id + 1)
+    .setIn(path, createRule(`${id}`, path, rule));
+};
+
+const updateRule = (
+  state: IRecord<StateRecord>,
+  path: string[],
+  properties: Partial<Pick<Rule, 'value' | 'name' | 'operator'>>
+): IRecord<StateRecord> => {
+  return state.updateIn(path, (rule: IRecord<Leaf>) => rule.merge(properties));
+};
+
+const removeRule = (
+  state: IRecord<StateRecord>,
+  path: string[]
+): IRecord<StateRecord> => {
+  if (path.length <= 1) {
+    return state;
+  }
+
+  return state.removeIn(path);
+};
+
+const initialState = <R extends string>(resource: R): IRecord<StateRecord> => {
+  return State({
+    counter: 1,
+    tree: createGroup(resource, '0', ['tree']),
+  });
+};
 
 const ruleInitializer = <R extends string, F extends FieldTypeDefinition>(
   schema: Schema<R, F>,
@@ -87,4 +213,17 @@ const invert = (obj: { [x: string]: string }) => {
   return newObj;
 };
 
-export { ruleInitializer, operatorToString, nullOperator, isNil, invert };
+export {
+  initialState,
+  addGroup,
+  updateGroup,
+  removeGroup,
+  addRule,
+  updateRule,
+  removeRule,
+  ruleInitializer,
+  operatorToString,
+  nullOperator,
+  isNil,
+  invert,
+};

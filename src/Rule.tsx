@@ -1,13 +1,21 @@
 import * as React from 'react';
 import { Record } from 'immutable';
-import { Schema, FieldTypeDefinition, Components, FieldSchema } from './types';
-import { ruleInitializer } from './utils';
-import { Leaf, State, removeRule, updateRule } from './immutable-utils';
+import {
+  Schema,
+  FieldTypeDefinition,
+  Components,
+  FieldSchema,
+  Leaf,
+  StateRecord,
+} from './types';
+import { ruleInitializer, removeRule, updateRule } from './utils';
 
 interface Props<R extends string, F extends FieldTypeDefinition> {
   rule: Record<Leaf>;
   resource: R;
-  setState: (callback: (state: Record<State>) => Record<State>) => void;
+  setState: (
+    callback: (state: Record<StateRecord>) => Record<StateRecord>
+  ) => void;
   schema: Schema<R, F>;
   components: Components;
   fieldSchema: FieldSchema<F>;

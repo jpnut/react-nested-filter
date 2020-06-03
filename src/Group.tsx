@@ -1,26 +1,29 @@
 import * as React from 'react';
 import { Record } from 'immutable';
 import { Rule } from './Rule';
-import { invert, ruleInitializer } from './utils';
+import {
+  invert,
+  ruleInitializer,
+  addGroup,
+  addRule,
+  removeGroup,
+  updateGroup,
+} from './utils';
 import {
   Components,
   FieldSchema,
   FieldTypeDefinition,
   Schema,
   SubGroupOptions,
+  BranchRecord,
+  StateRecord,
 } from './types';
-import {
-  Branch,
-  State,
-  addGroup,
-  addRule,
-  removeGroup,
-  updateGroup,
-} from './immutable-utils';
 
 interface Props<R extends string, F extends FieldTypeDefinition> {
-  group: Record<Branch>;
-  setState: (callback: (state: Record<State>) => Record<State>) => void;
+  group: Record<BranchRecord>;
+  setState: (
+    callback: (state: Record<StateRecord>) => Record<StateRecord>
+  ) => void;
   schema: Schema<R, F>;
   components: Components;
   fieldSchema: FieldSchema<F>;

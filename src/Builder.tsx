@@ -7,14 +7,15 @@ import {
   Components,
   FieldTypeDefinition,
   DefaultFieldDefinitions,
+  State,
+  StateRecord,
 } from './types';
-import { nullOperator } from './utils';
+import { nullOperator, initialState } from './utils';
 import { useFilter } from './use-filter';
-import { State, initialState } from './immutable-utils';
 
 interface BaseProps<R extends string, F extends FieldTypeDefinition> {
-  onChange?: (state: Record<State>) => void;
-  onFilter: (state: Record<State>) => void;
+  onChange?: (state: State) => void;
+  onFilter: (state: State) => void;
   resource: R;
   schema: Schema<R, F>;
   components?: (defaultComponents: Components) => Components;
@@ -28,8 +29,8 @@ type ControlledProps<
   R extends string,
   F extends FieldTypeDefinition
 > = BaseProps<R, F> & {
-  state: Record<State>;
-  setState: React.Dispatch<React.SetStateAction<Record<State>>>;
+  state: Record<StateRecord>;
+  setState: React.Dispatch<React.SetStateAction<Record<StateRecord>>>;
 };
 
 export type Props<R extends string, F extends FieldTypeDefinition> =
@@ -37,7 +38,7 @@ export type Props<R extends string, F extends FieldTypeDefinition> =
   | ControlledProps<R, F>;
 
 interface BuilderState {
-  state: Record<State>;
+  state: Record<StateRecord>;
 }
 
 const initialStateFromProps = <R extends string, F extends FieldTypeDefinition>(
@@ -107,13 +108,15 @@ export class Builder<
     }
   }
 
-  public setQueryState = (state: Record<State>) => {
+  public setQueryState = (state: Record<StateRecord>) => {
     this.setState({
       state,
     });
   };
 
-  public updateState = (callback: (state: Record<State>) => Record<State>) => {
+  public updateState = (
+    callback: (state: Record<StateRecord>) => Record<StateRecord>
+  ) => {
     const setState =
       'setState' in this.props ? this.props.setState : this.setQueryState;
 
@@ -124,12 +127,12 @@ export class Builder<
     const { onChange } = this.props;
 
     if (onChange) {
-      onChange(this.state.state);
+      onChange(this.state.state.toJS());
     }
   };
 
   public handleFilter = () => {
-    this.props.onFilter(this.state.state);
+    this.props.onFilter(this.state.state.toJS());
   };
 
   public render() {
